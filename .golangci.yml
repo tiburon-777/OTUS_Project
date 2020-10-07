@@ -1,0 +1,19 @@
+run:
+  tests: false
+
+linters:
+  disable-all: false
+  enable-all: true
+  disable:
+    - goerr113
+    - gochecknoglobals
+    - gochecknoinits
+    - godox
+    - gomnd
+    - lll
+    - nakedret
+    - wsl
+    - gofumpt
+    - gosec
+    - nlreturn
+    - gocritic
