@@ -1,11 +1,11 @@
 build:
-	go build -o bin ./src/main.go
+	go build -o bin ./previewer/main.go
 
 test:
-	go test -race ./src/...
+	go test -race ./previewer/...
 
 lint: install-lint-deps
-	golangci-lint run ./src/...
+	golangci-lint run ./previewer/...
 
 install-lint-deps:
 		(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.31.0

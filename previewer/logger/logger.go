@@ -2,12 +2,13 @@ package logger
 
 import (
 	"errors"
+	amitralog "github.com/amitrai48/logger"
 	"log"
 	"os"
 	"strings"
-
-	amitralog "github.com/amitrai48/logger"
 )
+
+type Fields map[string]interface{}
 
 type Interface interface {
 	Debugf(format string, args ...interface{})
@@ -18,13 +19,15 @@ type Interface interface {
 }
 
 type Logger struct {
-	Logger amitralog.Logger
+	amitralog.Logger
 }
+
 type Config struct {
-	File		string
-	Level		string
-	MuteStdout	bool
+	File       string
+	Level      string
+	MuteStdout bool
 }
+
 var validLevel = map[string]bool{"debug": true, "info": true, "warn": true, "error": true, "fatal": true}
 
 func New(conf Config) (Interface, error) {
