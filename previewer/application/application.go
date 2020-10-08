@@ -18,14 +18,14 @@ type App struct {
 func New(conf config.Config) *App {
 	loger, err := logger.New(conf.Log)
 	if err != nil {
-		oslog.Fatal("не удалось прикрутить логгер")
+		oslog.Fatal("не удалось прикрутить логгер: ", err.Error())
 	}
 	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port), Handler: LoggingMiddleware(http.HandlerFunc(Handler), loger)}, Log: loger}
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
-	_, _ = w.Write([]byte("Hello! I'm calendar app!"))
+	_, _ = w.Write([]byte("Hello! Хрен вам, а не картинка!!!"))
 }
 
 func LoggingMiddleware(next http.Handler, l logger.Interface) http.HandlerFunc {

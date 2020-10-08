@@ -13,7 +13,7 @@ type Config struct {
 		Port    string
 	}
 	Cache struct {
-		Capasity string
+		Capasity int
 	}
 	Log struct {
 		File       string

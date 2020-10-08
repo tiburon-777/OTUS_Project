@@ -49,7 +49,7 @@ func New(conf Config) (Interface, error) {
 	if err := amitralog.NewLogger(c, amitralog.InstanceZapLogger); err != nil {
 		log.Fatalf("Could not instantiate log %s", err.Error())
 	}
-	l := amitralog.WithFields(amitralog.Fields{"hw": "12"})
+	l := amitralog.WithFields(amitralog.Fields{"service": "previewer"})
 	return l, nil
 }
 

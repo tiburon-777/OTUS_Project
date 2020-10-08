@@ -16,3 +16,4 @@
 
 examples
 .idea
+*.log
