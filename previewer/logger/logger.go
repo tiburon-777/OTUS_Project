@@ -2,10 +2,11 @@ package logger
 
 import (
 	"errors"
-	amitralog "github.com/amitrai48/logger"
 	"log"
 	"os"
 	"strings"
+
+	amitralog "github.com/amitrai48/logger"
 )
 
 type Fields map[string]interface{}

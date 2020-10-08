@@ -51,7 +51,7 @@ Port = "80"`)
 	t.Run("TOML reading", func(t *testing.T) {
 		c, e := NewConfig(goodfile.Name())
 		require.Equal(t, "localhost", c.Server.Address)
-		require.Equal(t, 80, c.Server.Port)
+		require.Equal(t, "80", c.Server.Port)
 		require.NoError(t, e)
 	})
 

@@ -1,12 +1,13 @@
 package application
 
 import (
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
-	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 	oslog "log"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/tiburon-777/OTUS_Project/previewer/config"
+	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 )
 
 type App struct {
@@ -19,7 +20,7 @@ func New(conf config.Config) *App {
 	if err != nil {
 		oslog.Fatal("не удалось прикрутить логгер")
 	}
-	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port), Handler: LoggingMiddleware(Handler, loger)}, Log: loger}
+	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port), Handler: LoggingMiddleware(http.HandlerFunc(Handler), loger)}, Log: loger}
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("Hello! I'm calendar app!"))
 }
 
-func LoggingMiddleware(next http.HandlerFunc, l logger.Interface) http.HandlerFunc {
+func LoggingMiddleware(next http.Handler, l logger.Interface) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer func() {

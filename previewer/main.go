@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"github.com/tiburon-777/OTUS_Project/previewer/application"
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
 	oslog "log"
 	"os"
 	"os/signal"
+
+	"github.com/tiburon-777/OTUS_Project/previewer/application"
+	"github.com/tiburon-777/OTUS_Project/previewer/config"
 )
 
 var ConfigFile = flag.String("config", "/etc/previewer.conf", "Path to configuration file")
