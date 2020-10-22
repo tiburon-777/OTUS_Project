@@ -20,7 +20,6 @@ func main() {
 	}
 
 	app := application.New(conf)
-
 	go func() {
 		signals := make(chan os.Signal, 1)
 		signal.Notify(signals)
