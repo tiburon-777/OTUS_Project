@@ -21,11 +21,12 @@ func New(conf config.Config) *App {
 		oslog.Fatal("не удалось прикрутить логгер: ", err.Error())
 	}
 	c := cache.NewCache(conf.Cache.Capasity)
-	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port), Handler: LoggingMiddleware(http.HandlerFunc(Handler), loger)}, Log: loger, Cache: c}
+	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port)}, Log: loger, Cache: c}
 }
 
 func (s *App) Start() error {
 	s.Log.Infof("Server starting")
+	s.Handler = loggingMiddleware(handler(&s.Cache), s.Log)
 	_ = s.ListenAndServe()
 	s.Log.Infof("Server stoped")
 	return nil

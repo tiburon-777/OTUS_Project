@@ -1,24 +1,29 @@
 package application
 
 import (
+	"github.com/tiburon-777/OTUS_Project/previewer/cache"
 	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 	"net/http"
 	"time"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	q,err := buildQuery(r.URL)
-	if err!=nil {
-		writeResponce(w, r.Header,501,[]byte("Can't parse query"))
-	}
-	pic, h, err := getPic(q)
-	if err!=nil {
-		writeResponce(w, h,501,[]byte("Have problem with cache"))
-	}
-	writeResponce(w, r.Header,200,pic)
+func handler(c *cache.Cache) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q,err := buildQuery(r.URL)
+		if err!=nil {
+			http.Error(w, "Can't parse query", http.StatusNotFound)
+			return
+		}
+		pic, h, err := getPic(q)
+		if err!=nil {
+			http.Error(w, "Have problem with cache", http.StatusInternalServerError)
+			return
+		}
+		writeResponce(w, h,200,pic)
+	})
 }
 
-func LoggingMiddleware(next http.Handler, l logger.Interface) http.HandlerFunc {
+func loggingMiddleware(next http.Handler, l logger.Interface) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		defer func() {
