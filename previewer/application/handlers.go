@@ -3,22 +3,36 @@ package application
 import (
 	"github.com/tiburon-777/OTUS_Project/previewer/cache"
 	"github.com/tiburon-777/OTUS_Project/previewer/logger"
+	"log"
 	"net/http"
 	"time"
 )
 
-func handler(c *cache.Cache) http.Handler {
+func handler(c cache.Cache) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		q,err := buildQuery(r.URL)
+		q,err := BuildQuery(r.URL)
 		if err!=nil {
 			http.Error(w, "Can't parse query", http.StatusNotFound)
 			return
 		}
-		pic, h, err := getPic(q)
-		if err!=nil {
-			http.Error(w, "Have problem with cache", http.StatusInternalServerError)
+		b,ok := c.Get(cache.Key(q.id()))
+		pic,ok := b.([]byte)
+		if ok {
+			log.Println("Взяли из кэша")
+			writeResponce(w, nil,200,pic)
 			return
 		}
+		pic,h,err := q.fromOrigin()
+		if err != nil {
+			http.Error(w, "Pic not found in origin", http.StatusNotFound)
+			return
+		}
+		pic, err = q.resize(pic)
+		if err != nil {
+			http.Error(w, "Resizer kirdyk...", http.StatusInternalServerError)
+			return
+		}
+		c.Set(cache.Key(q.id()),pic)
 		writeResponce(w, h,200,pic)
 	})
 }

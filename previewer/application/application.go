@@ -26,7 +26,7 @@ func New(conf config.Config) *App {
 
 func (s *App) Start() error {
 	s.Log.Infof("Server starting")
-	s.Handler = loggingMiddleware(handler(&s.Cache), s.Log)
+	s.Handler = loggingMiddleware(handler(s.Cache), s.Log)
 	_ = s.ListenAndServe()
 	s.Log.Infof("Server stoped")
 	return nil
