@@ -11,7 +11,7 @@ import (
 
 type App struct {
 	*http.Server
-	Log logger.Interface
+	Log   logger.Interface
 	Cache cache.Cache
 }
 
@@ -38,4 +38,3 @@ func (s *App) Stop() error {
 	}
 	return nil
 }
-
