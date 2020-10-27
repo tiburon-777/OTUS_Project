@@ -1,5 +1,5 @@
 run:
-  tests: true
+  tests: false
 
 linters:
   disable-all: false
@@ -14,3 +14,5 @@ linters:
     - nakedret
     - testpackage
     - wsl
+    - nlreturn
+    - whitespace

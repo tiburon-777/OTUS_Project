@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -39,7 +40,7 @@ func (q Query) id() string {
 
 func (q Query) fromOrigin() ([]byte, http.Header, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://"+q.URL.Host+"/"+q.URL.Path, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", "https://"+q.URL.Host+"/"+q.URL.Path, nil)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -3,13 +3,14 @@ package converter
 import (
 	"bytes"
 	"errors"
-	"github.com/nfnt/resize"
 	"image"
 	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"net/http"
+
+	"github.com/nfnt/resize"
 )
 
 type Image struct {
@@ -63,7 +64,7 @@ func (img *Image) convert(width int, height int) error {
 	widthOrig := img.Bounds().Max.X
 	heightOrig := img.Bounds().Max.Y
 	sfOriginal := sizeFactor(widthOrig, heightOrig)
-	sfNew := sizeFactor(int(width), int(height))
+	sfNew := sizeFactor(width, height)
 	switch {
 	case sfOriginal > sfNew:
 		// Ресайз по одной высоте и кроп по ширине следом
@@ -85,7 +86,7 @@ func (img *Image) convert(width int, height int) error {
 }
 
 func (img *Image) resize(width, height int) {
-	img = &Image{resize.Resize(uint(width), uint(height), img, resize.Bicubic)}
+	img.Image = resize.Resize(uint(width), uint(height), img, resize.Bicubic)
 }
 
 func (img *Image) crop(p1 image.Point, p2 image.Point) error {

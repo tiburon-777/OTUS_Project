@@ -1,12 +1,13 @@
 package application
 
 import (
-	"github.com/tiburon-777/OTUS_Project/previewer/cache"
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
-	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 	oslog "log"
 	"net"
 	"net/http"
+
+	"github.com/tiburon-777/OTUS_Project/previewer/cache"
+	"github.com/tiburon-777/OTUS_Project/previewer/config"
+	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 )
 
 type App struct {

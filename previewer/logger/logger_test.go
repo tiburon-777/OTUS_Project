@@ -1,12 +1,13 @@
 package logger
 
 import (
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	oslog "log"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoggerLogic(t *testing.T) {

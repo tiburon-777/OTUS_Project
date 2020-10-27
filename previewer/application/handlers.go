@@ -1,12 +1,13 @@
 package application
 
 import (
-	"github.com/tiburon-777/OTUS_Project/previewer/cache"
-	"github.com/tiburon-777/OTUS_Project/previewer/converter"
-	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/tiburon-777/OTUS_Project/previewer/cache"
+	"github.com/tiburon-777/OTUS_Project/previewer/converter"
+	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 )
 
 func handler(c cache.Cache) http.Handler {
@@ -16,9 +17,9 @@ func handler(c cache.Cache) http.Handler {
 			http.Error(w, "Can't parse query", http.StatusNotFound)
 			return
 		}
-		b, ok := c.Get(cache.Key(q.id()))
-		pic, ok := b.([]byte)
-		if ok {
+		b, ok1 := c.Get(cache.Key(q.id()))
+		pic, ok2 := b.([]byte)
+		if ok1 && ok2 {
 			log.Println("Взяли из кэша")
 			writeResponse(w, nil, pic)
 			return
