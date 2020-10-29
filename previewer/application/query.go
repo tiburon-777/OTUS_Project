@@ -11,13 +11,16 @@ import (
 )
 
 type Query struct {
-	Height int
 	Width  int
+	Height int
 	URL    *url.URL
 }
 
 func buildQuery(u *url.URL) (q Query, err error) {
 	t := strings.Split(u.Path, "/")
+	if len(t) < 5 {
+		return Query{}, errors.New("need more params")
+	}
 	q.Width, err = strconv.Atoi(t[2])
 	if err != nil {
 		return Query{}, errors.New("width must be an integer")

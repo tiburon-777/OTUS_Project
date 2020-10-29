@@ -24,7 +24,7 @@ func handler(c cache.Cache) http.Handler {
 			writeResponse(w, nil, pic)
 			return
 		}
-		pic, h, err := q.fromOrigin()
+		pic, _, err = q.fromOrigin()
 		if err != nil {
 			http.Error(w, "Pic not found in origin", http.StatusNotFound)
 			return
@@ -35,7 +35,7 @@ func handler(c cache.Cache) http.Handler {
 			return
 		}
 		c.Set(cache.Key(q.id()), pic)
-		writeResponse(w, h, pic)
+		writeResponse(w, nil, pic)
 	})
 }
 

@@ -19,45 +19,56 @@ type Image struct {
 
 func SelectType(width int, height int, b []byte) ([]byte, error) {
 	contentType := http.DetectContentType(b)
-	var decode func(reader *bytes.Reader) (image.Image, error)
+	var decode func(b []byte) (image.Image, error)
 	var encode func(m image.Image) ([]byte, error)
 	switch contentType {
-	case "image/png":
-		decode = func(reader *bytes.Reader) (image.Image, error) {
-			return png.Decode(bytes.NewReader(b))
+	case "image/jpeg":
+		decode = func(b []byte) (image.Image, error) {
+			tb := bytes.NewBuffer(b)
+			return jpeg.Decode(tb)
 		}
-		encode = func(m image.Image) (res []byte, err error) {
-			err = png.Encode(bytes.NewBuffer(res), m)
-			return res, err
+		encode = func(m image.Image) ([]byte, error) {
+			res := bytes.NewBuffer([]byte{})
+			err := jpeg.Encode(res, m, &jpeg.Options{Quality: 80})
+			return res.Bytes(), err
+		}
+	case "image/png":
+		decode = func(b []byte) (image.Image, error) {
+			tb := bytes.NewBuffer(b)
+			return png.Decode(tb)
+		}
+		encode = func(m image.Image) ([]byte, error) {
+			res := bytes.NewBuffer([]byte{})
+			err := png.Encode(res, m)
+			return res.Bytes(), err
 		}
 	case "image/gif":
-		decode = func(reader *bytes.Reader) (image.Image, error) {
-			return gif.Decode(bytes.NewReader(b))
+		decode = func(b []byte) (image.Image, error) {
+			tb := bytes.NewBuffer(b)
+			return gif.Decode(tb)
 		}
-		encode = func(m image.Image) (res []byte, err error) {
-			err = gif.Encode(bytes.NewBuffer(res), m, nil)
-			return res, err
+		encode = func(m image.Image) ([]byte, error) {
+			res := bytes.NewBuffer([]byte{})
+			err := gif.Encode(res, m, nil)
+			return res.Bytes(), err
 		}
 	default:
-		decode = func(reader *bytes.Reader) (image.Image, error) {
-			return jpeg.Decode(bytes.NewReader(b))
+		decode = func(b []byte) (image.Image, error) {
+			return nil, errors.New("unknown format")
 		}
-		encode = func(m image.Image) (res []byte, err error) {
-			err = jpeg.Encode(bytes.NewBuffer(res), m, nil)
-			return res, err
+		encode = func(m image.Image) ([]byte, error) {
+			return nil, errors.New("unknown format")
 		}
 	}
-	i, err := decode(bytes.NewReader(b))
+	i, err := decode(b)
+	if err != nil {
+		return nil, err
+	}
 	m := Image{i}
-	if err != nil {
+	if err = m.convert(width, height); err != nil {
 		return nil, err
 	}
-	err = m.convert(width, height)
-	if err != nil {
-		return nil, err
-	}
-	res, err := encode(m)
-	return res, err
+	return encode(m.Image)
 }
 
 func (img *Image) convert(width int, height int) error {
@@ -65,20 +76,23 @@ func (img *Image) convert(width int, height int) error {
 	heightOrig := img.Bounds().Max.Y
 	sfOriginal := sizeFactor(widthOrig, heightOrig)
 	sfNew := sizeFactor(width, height)
+
 	switch {
 	case sfOriginal > sfNew:
 		// Ресайз по одной высоте и кроп по ширине следом
 		// Определение ширины кропа.
-		img.resize(int(float64(widthOrig)*sfOriginal), height)
-		if err := img.crop(image.Point{X: (widthOrig - width) / 2, Y: 0}, image.Point{X: (widthOrig-width)/2 + width, Y: height}); err != nil {
+		calcWidth := int(float64(height) * sfOriginal)
+		img.resize(calcWidth, height)
+		if err := img.crop(image.Point{X: (calcWidth - width) / 2, Y: 0}, image.Point{X: (calcWidth-width)/2 + width, Y: height}); err != nil {
 			return err
 		}
 	case sfOriginal == sfNew:
 		img.resize(width, height)
 	case sfOriginal < sfNew:
 		// Ресайз по одной ширине и кроп по высоте следом
-		img.resize(width, int(float64(heightOrig)*sfOriginal))
-		if err := img.crop(image.Point{X: 0, Y: (heightOrig - height) / 2}, image.Point{X: width, Y: (heightOrig-height)/2 + height}); err != nil {
+		calcHeight := int(float64(width) / sfOriginal)
+		img.resize(width, calcHeight)
+		if err := img.crop(image.Point{X: 0, Y: (calcHeight - height) / 2}, image.Point{X: width, Y: (calcHeight-height)/2 + height}); err != nil {
 			return err
 		}
 	}
@@ -96,9 +110,10 @@ func (img *Image) crop(p1 image.Point, p2 image.Point) error {
 	if p1.X < 0 || p1.Y < 0 || p2.X < 0 || p2.Y < 0 {
 		return errors.New("not valid corner points")
 	}
-	b := image.Rect(0, 0, p2.X, p2.Y)
+	b := image.Rect(0, 0, p2.X-p1.X, p2.Y-p1.Y)
 	resImg := image.NewRGBA(b)
-	draw.Draw(resImg, b, img, p1, draw.Src)
+	draw.Draw(resImg, b, img.Image, p1, draw.Src)
+	img.Image = resImg
 	return nil
 }
 
