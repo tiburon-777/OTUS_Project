@@ -9,12 +9,14 @@ import (
 	"image/jpeg"
 	"image/png"
 	"net/http"
+	"sync"
 
 	"github.com/nfnt/resize"
 )
 
 type Image struct {
 	image.Image
+	mx sync.Mutex
 }
 
 func SelectType(width int, height int, b []byte) ([]byte, error) {
@@ -64,11 +66,15 @@ func SelectType(width int, height int, b []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := Image{i}
+	m := NewImage(i)
 	if err = m.convert(width, height); err != nil {
 		return nil, err
 	}
 	return encode(m.Image)
+}
+
+func NewImage(img image.Image) Image {
+	return Image{img, sync.Mutex{}}
 }
 
 func (img *Image) convert(width int, height int) error {
@@ -79,19 +85,22 @@ func (img *Image) convert(width int, height int) error {
 
 	switch {
 	case sfOriginal > sfNew:
-		// Ресайз по одной высоте и кроп по ширине следом
-		// Определение ширины кропа.
 		calcWidth := int(float64(height) * sfOriginal)
-		img.resize(calcWidth, height)
+		if err := img.resize(calcWidth, height); err != nil {
+			return err
+		}
 		if err := img.crop(image.Point{X: (calcWidth - width) / 2, Y: 0}, image.Point{X: (calcWidth-width)/2 + width, Y: height}); err != nil {
 			return err
 		}
 	case sfOriginal == sfNew:
-		img.resize(width, height)
+		if err := img.resize(width, height); err != nil {
+			return err
+		}
 	case sfOriginal < sfNew:
-		// Ресайз по одной ширине и кроп по высоте следом
 		calcHeight := int(float64(width) / sfOriginal)
-		img.resize(width, calcHeight)
+		if err := img.resize(width, calcHeight); err != nil {
+			return err
+		}
 		if err := img.crop(image.Point{X: 0, Y: (calcHeight - height) / 2}, image.Point{X: width, Y: (calcHeight-height)/2 + height}); err != nil {
 			return err
 		}
@@ -99,15 +108,24 @@ func (img *Image) convert(width int, height int) error {
 	return nil
 }
 
-func (img *Image) resize(width, height int) {
-	img.Image = resize.Resize(uint(width), uint(height), img, resize.Bicubic)
+func (img *Image) resize(width, height int) error {
+	img.mx.Lock()
+	defer img.mx.Unlock()
+	if width <= 0 || height <= 0 {
+		return errors.New("can't resize to zero or negative value")
+	}
+	tmpImg := resize.Resize(uint(width), uint(height), img, resize.Bicubic)
+	img.Image = tmpImg
+	return nil
 }
 
 func (img *Image) crop(p1 image.Point, p2 image.Point) error {
-	if img == nil {
+	img.mx.Lock()
+	defer img.mx.Unlock()
+	if img.Image == nil {
 		return errors.New("corrupted image")
 	}
-	if p1.X < 0 || p1.Y < 0 || p2.X < 0 || p2.Y < 0 {
+	if p1.X < 0 || p1.Y < 0 || p2.X > img.Image.Bounds().Max.X || p2.Y > img.Image.Bounds().Max.Y {
 		return errors.New("not valid corner points")
 	}
 	b := image.Rect(0, 0, p2.X-p1.X, p2.Y-p1.Y)
