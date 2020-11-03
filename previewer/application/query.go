@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Query struct {
@@ -41,9 +42,11 @@ func (q Query) id() string {
 	return strconv.Itoa(q.Width) + "/" + strconv.Itoa(q.Height) + "/" + q.URL.Path
 }
 
-func (q Query) fromOrigin() ([]byte, http.Header, error) {
+func (q Query) fromOrigin(timeout time.Duration) ([]byte, *http.Response, error) {
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(context.Background(), "GET", "https://"+q.URL.Host+"/"+q.URL.Path, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+"/"+q.URL.Path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -59,5 +62,5 @@ func (q Query) fromOrigin() ([]byte, http.Header, error) {
 	if err = res.Body.Close(); err != nil {
 		return nil, nil, err
 	}
-	return body, res.Header, nil
+	return body, res, nil
 }

@@ -16,3 +16,4 @@ linters:
     - wsl
     - nlreturn
     - whitespace
+    - bodyclose

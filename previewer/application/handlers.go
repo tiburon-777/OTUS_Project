@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/tiburon-777/OTUS_Project/previewer/cache"
+	"github.com/tiburon-777/OTUS_Project/previewer/config"
 	"github.com/tiburon-777/OTUS_Project/previewer/converter"
 	"github.com/tiburon-777/OTUS_Project/previewer/logger"
 )
 
-func handler(c cache.Cache) http.Handler {
+func handler(c cache.Cache, conf config.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q, err := buildQuery(r.URL)
 		if err != nil {
@@ -24,8 +25,8 @@ func handler(c cache.Cache) http.Handler {
 			writeResponse(w, nil, pic)
 			return
 		}
-		pic, _, err = q.fromOrigin()
-		if err != nil {
+		pic, res, err := q.fromOrigin(time.Duration(conf.Query.Timeout) * time.Second)
+		if err != nil || res.StatusCode != 200 {
 			http.Error(w, "Pic not found in origin", http.StatusNotFound)
 			return
 		}

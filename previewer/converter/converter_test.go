@@ -92,7 +92,6 @@ func TestCrop(t *testing.T) {
 	}
 }
 
-/*
 func TestConvert(t *testing.T) {
 	originalAspect := 800.0 / 600.0
 	releasedValue := 3000
@@ -105,19 +104,19 @@ func TestConvert(t *testing.T) {
 		msg       string
 	}{
 		{
-			width: 400, height: 600, expectedX: 400, expectedY: int(400 / originalAspect), err: false, msg: "Reducing the image size by horizontal",
+			width: 400, height: 600, expectedX: 400, expectedY: 600, err: false, msg: "Reducing the image size by horizontal",
 		},
 		{
-			width: 800, height: 400, expectedX: int(400 * originalAspect), expectedY: 400, err: false, msg: "Reducing the image size by vertical",
+			width: 800, height: 400, expectedX: 800, expectedY: 400, err: false, msg: "Reducing the image size by vertical",
 		},
 		{
 			width: 400, height: int(400 / originalAspect), expectedX: 400, expectedY: int(400 / originalAspect), err: false, msg: "Resize to original aspect ratio",
 		},
 		{
-			width: 1000, height: releasedValue, expectedX: 1000, expectedY: int(1000 / originalAspect), err: false, msg: "Increasing the image size by horizontal",
+			width: 1000, height: releasedValue, expectedX: 1000, expectedY: releasedValue, err: false, msg: "Increasing the image size by horizontal",
 		},
 		{
-			width: releasedValue, height: 1000, expectedX: int(1000 * originalAspect), expectedY: 1000, err: false, msg: "Increasing the image size by vertical",
+			width: releasedValue, height: 1000, expectedX: releasedValue, expectedY: 1000, err: false, msg: "Increasing the image size by vertical",
 		},
 		{
 			width: 0, height: 0, expectedX: 800, expectedY: 600, err: true, msg: "Resize to zero",
@@ -141,7 +140,6 @@ func TestConvert(t *testing.T) {
 		})
 	}
 }
-*/
 
 func createImage(w, h int) image.Image {
 	res := image.NewRGBA(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: w, Y: h}})

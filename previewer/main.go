@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	oslog "log"
 	"os"
 	"os/signal"
 
@@ -16,7 +15,7 @@ func main() {
 	flag.Parse()
 	conf, err := config.NewConfig(*ConfigFile)
 	if err != nil {
-		oslog.Fatal("не удалось открыть файл конфигурации:", err.Error())
+		conf.SetDefault()
 	}
 
 	app := application.New(conf)

@@ -13,7 +13,10 @@ type Config struct {
 		Port    string
 	}
 	Cache struct {
-		Capasity int
+		Capacity int
+	}
+	Query struct {
+		Timeout int
 	}
 	Log struct {
 		File       string
@@ -23,16 +26,29 @@ type Config struct {
 }
 
 func NewConfig(configFile string) (Config, error) {
+	var config Config
 	f, err := os.Open(configFile)
 	if err != nil {
-		return Config{}, err
+		return config, err
 	}
 	defer f.Close()
 	s, err := ioutil.ReadAll(f)
 	if err != nil {
-		return Config{}, err
+		return config, err
 	}
-	var config Config
 	_, err = toml.Decode(string(s), &config)
 	return config, err
+}
+
+func (c *Config) SetDefault() {
+	c.Server = struct {
+		Address string
+		Port    string
+	}{Address: "localhost", Port: "80"}
+	c.Cache = struct{ Capacity int }{Capacity: 20}
+	c.Log = struct {
+		File       string
+		Level      string
+		MuteStdout bool
+	}{File: "previewer.log", Level: "INFO", MuteStdout: false}
 }

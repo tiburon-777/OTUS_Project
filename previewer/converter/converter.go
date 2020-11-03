@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/nfnt/resize"
+	"github.com/anthonynsimon/bild/transform"
 )
 
 type Image struct {
@@ -80,8 +80,11 @@ func NewImage(img image.Image) Image {
 func (img *Image) convert(width int, height int) error {
 	widthOrig := img.Bounds().Max.X
 	heightOrig := img.Bounds().Max.Y
-	sfOriginal := sizeFactor(widthOrig, heightOrig)
-	sfNew := sizeFactor(width, height)
+	if width <= 0 || height <= 0 {
+		return errors.New("can't reduce toOrBelow zero")
+	}
+	sfOriginal, _ := sizeFactor(widthOrig, heightOrig)
+	sfNew, _ := sizeFactor(width, height)
 
 	switch {
 	case sfOriginal > sfNew:
@@ -114,7 +117,7 @@ func (img *Image) resize(width, height int) error {
 	if width <= 0 || height <= 0 {
 		return errors.New("can't resize to zero or negative value")
 	}
-	tmpImg := resize.Resize(uint(width), uint(height), img, resize.Bicubic)
+	tmpImg := transform.Resize(img, width, height, transform.Linear)
 	img.Image = tmpImg
 	return nil
 }
@@ -135,6 +138,9 @@ func (img *Image) crop(p1 image.Point, p2 image.Point) error {
 	return nil
 }
 
-func sizeFactor(width int, height int) float64 {
-	return float64(width) / float64(height)
+func sizeFactor(width int, height int) (float64, error) {
+	if height == 0 {
+		return 0, errors.New("can't divide by zero")
+	}
+	return float64(width) / float64(height), nil
 }
