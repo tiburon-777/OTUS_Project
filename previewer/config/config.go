@@ -44,7 +44,7 @@ func (c *Config) SetDefault() {
 	c.Server = struct {
 		Address string
 		Port    string
-	}{Address: "localhost", Port: "80"}
+	}{Address: "localhost", Port: "8080"}
 	c.Cache = struct{ Capacity int }{Capacity: 20}
 	c.Log = struct {
 		File       string

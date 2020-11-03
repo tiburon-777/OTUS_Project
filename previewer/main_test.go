@@ -24,7 +24,7 @@ func TestIntegrationPositive(t *testing.T) {
 	wg.Add(2)
 	t.Run("remote server return jpeg", func(t *testing.T) {
 		defer wg.Done()
-		body, _, err := request("http://localhost/fill/1024/504/localhost:3000/gopher_original_1024x504.jpg", 15*time.Second)
+		body, _, err := request("http://localhost:8080/fill/1024/504/localhost:3000/gopher_original_1024x504.jpg", 15*time.Second)
 		require.NoError(t, err)
 		require.NotNil(t, body)
 		//require.Equal(t, 200, resp.StatusCode)
