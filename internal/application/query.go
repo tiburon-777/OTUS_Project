@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -42,25 +43,26 @@ func (q Query) id() string {
 	return strconv.Itoa(q.Width) + "/" + strconv.Itoa(q.Height) + "/" + q.URL.Path
 }
 
-func (q Query) fromOrigin(timeout time.Duration) ([]byte, *http.Response, error) {
+func (q Query) fromOrigin(headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {
 	client := &http.Client{}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+q.URL.Path, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("can't create request: %w", err)
 	}
+	req.Header = headers
 	req.Close = true
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("can't do request: %w", err)
 	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("can't read body from response: %w", err)
 	}
 	if err = res.Body.Close(); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("can't close body: %w", err)
 	}
 	return body, res, nil
 }

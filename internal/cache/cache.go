@@ -1,16 +1,16 @@
 package cache
 
 import (
-	"log"
+	"fmt"
 	"sync"
 )
 
 type Key string
 
 type Cache interface {
-	Set(key Key, value interface{}) bool // Добавить значение в кэш по ключу
-	Get(key Key) (interface{}, bool)     // Получить значение из кэша по ключу
-	Clear()                              // Очистить кэш
+	Set(key Key, value interface{}) (bool, error) // Добавить значение в кэш по ключу
+	Get(key Key) (interface{}, bool, error)       // Получить значение из кэша по ключу
+	Clear()                                       // Очистить кэш
 }
 
 type lruCache struct {
@@ -33,48 +33,44 @@ func NewCache(capacity int) Cache {
 	}
 }
 
-func (l *lruCache) Set(key Key, value interface{}) bool {
+func (l *lruCache) Set(key Key, value interface{}) (bool, error) {
+	l.mx.Lock()
+	defer l.mx.Unlock()
 	if _, exists := l.items[key]; exists {
-		l.mx.RLock()
 		l.items[key].Value = Item{Value: value, Key: key}
 		l.queue.MoveToFront(l.items[key])
-		l.mx.RUnlock()
-		return exists
+		return exists, nil
 	}
 	if l.queue.Len() == l.capacity {
-		l.mx.RLock()
 		k, ok := l.queue.Back().Value.(Item)
 		if !ok {
-			log.Fatal("Ошибка приведения типов")
+			return false, fmt.Errorf("can't cast type")
 		}
 		delete(l.items, k.Key)
 		l.queue.Remove(l.queue.Back())
-		l.mx.RUnlock()
 	}
-	l.mx.RLock()
 	l.items[key] = l.queue.PushFront(Item{Value: value, Key: key})
-	l.mx.RUnlock()
-	return false
+	return false, nil
 }
 
-func (l *lruCache) Get(key Key) (interface{}, bool) {
+func (l *lruCache) Get(key Key) (interface{}, bool, error) {
 	l.mx.Lock()
 	defer l.mx.Unlock()
 	if l.items[key] == nil {
-		return nil, false
+		return nil, false, nil
 	}
 	l.queue.MoveToFront(l.items[key])
 	s, ok := l.items[key].Value.(Item)
 	if !ok {
-		log.Fatal("Ошибка приведения типов")
+		return nil, false, fmt.Errorf("can't cast type")
 	}
-	return s.Value, true
+	return s.Value, true, nil
 }
 
 func (l *lruCache) Clear() {
 	l.mx.Lock()
+	defer l.mx.Unlock()
 	l.items = nil
 	l.queue.len = 0
 	l.queue.Info = ListItem{}
-	l.mx.Unlock()
 }

@@ -13,38 +13,47 @@ func TestCache(t *testing.T) {
 	t.Run("empty cache", func(t *testing.T) {
 		c := NewCache(10)
 
-		_, ok := c.Get("aaa")
+		_, ok, err := c.Get("aaa")
+		require.NoError(t, err)
 		require.False(t, ok)
 
-		_, ok = c.Get("bbb")
+		_, ok, err = c.Get("bbb")
+		require.NoError(t, err)
 		require.False(t, ok)
 	})
 
 	t.Run("simple", func(t *testing.T) {
 		c := NewCache(5)
 
-		wasInCache := c.Set("aaa", 100)
+		wasInCache, err := c.Set("aaa", 100)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		wasInCache = c.Set("bbb", 200)
+		wasInCache, err = c.Set("bbb", 200)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		val, ok := c.Get("aaa")
+		val, ok, err := c.Get("aaa")
+		require.NoError(t, err)
 		require.True(t, ok)
 		require.Equal(t, 100, val)
 
-		val, ok = c.Get("bbb")
+		val, ok, err = c.Get("bbb")
+		require.NoError(t, err)
 		require.True(t, ok)
 		require.Equal(t, 200, val)
 
-		wasInCache = c.Set("aaa", 300)
+		wasInCache, err = c.Set("aaa", 300)
+		require.NoError(t, err)
 		require.True(t, wasInCache)
 
-		val, ok = c.Get("aaa")
+		val, ok, err = c.Get("aaa")
+		require.NoError(t, err)
 		require.True(t, ok)
 		require.Equal(t, 300, val)
 
-		val, ok = c.Get("ccc")
+		val, ok, err = c.Get("ccc")
+		require.NoError(t, err)
 		require.False(t, ok)
 		require.Nil(t, val)
 	})
@@ -52,28 +61,36 @@ func TestCache(t *testing.T) {
 	t.Run("purge logic", func(t *testing.T) {
 		c := NewCache(3)
 
-		wasInCache := c.Set("aaa", 100)
+		wasInCache, err := c.Set("aaa", 100)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		wasInCache = c.Set("bbb", 200)
+		wasInCache, err = c.Set("bbb", 200)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		wasInCache = c.Set("ccc", 300)
+		wasInCache, err = c.Set("ccc", 300)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		_, ok := c.Get("bbb")
+		_, ok, err := c.Get("bbb")
+		require.NoError(t, err)
 		require.True(t, ok)
 
-		_, ok = c.Get("aaa")
+		_, ok, err = c.Get("aaa")
+		require.NoError(t, err)
 		require.True(t, ok)
 
-		wasInCache = c.Set("ddd", 400)
+		wasInCache, err = c.Set("ddd", 400)
+		require.NoError(t, err)
 		require.False(t, wasInCache)
 
-		_, ok = c.Get("ddd")
+		_, ok, err = c.Get("ddd")
+		require.NoError(t, err)
 		require.True(t, ok)
 
-		_, ok = c.Get("ccc")
+		_, ok, err = c.Get("ccc")
+		require.NoError(t, err)
 		require.False(t, ok)
 	})
 }
