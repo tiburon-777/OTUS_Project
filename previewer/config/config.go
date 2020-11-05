@@ -46,6 +46,7 @@ func (c *Config) SetDefault() {
 		Port    string
 	}{Address: "localhost", Port: "8080"}
 	c.Cache = struct{ Capacity int }{Capacity: 20}
+	c.Query = struct{ Timeout int }{Timeout: 15}
 	c.Log = struct {
 		File       string
 		Level      string

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 
@@ -15,6 +16,7 @@ func main() {
 	flag.Parse()
 	conf, err := config.NewConfig(*ConfigFile)
 	if err != nil {
+		log.Println("Configuration file not found. Will use defaults.")
 		conf.SetDefault()
 	}
 
