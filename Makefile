@@ -1,11 +1,11 @@
 build:
-	go build -o bin ./previewer/main.go
+	go build -o bin ./cmd/main.go
 
 test:
-	go test -race ./previewer/...
+	go test -race ./cmd/... ./internal/...
 
 lint: install-lint-deps
-	golangci-lint run ./previewer/...
+	golangci-lint run ./previewer/... ./internal/...
 
 install-lint-deps:
 	rm -rf $(shell go env GOPATH)/bin/golangci-lint

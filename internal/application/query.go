@@ -46,7 +46,7 @@ func (q Query) fromOrigin(timeout time.Duration) ([]byte, *http.Response, error)
 	client := &http.Client{}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+"/"+q.URL.Path, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+q.URL.Path, nil)
 	if err != nil {
 		return nil, nil, err
 	}

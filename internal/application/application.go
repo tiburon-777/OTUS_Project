@@ -5,9 +5,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/tiburon-777/OTUS_Project/previewer/cache"
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
-	"github.com/tiburon-777/OTUS_Project/previewer/logger"
+	"github.com/tiburon-777/OTUS_Project/internal/cache"
+	"github.com/tiburon-777/OTUS_Project/internal/config"
+	"github.com/tiburon-777/OTUS_Project/internal/logger"
 )
 
 type App struct {

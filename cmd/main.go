@@ -6,8 +6,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/tiburon-777/OTUS_Project/previewer/application"
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
+	"github.com/tiburon-777/OTUS_Project/internal/application"
+	"github.com/tiburon-777/OTUS_Project/internal/config"
 )
 
 var ConfigFile = flag.String("config", "/etc/previewer.conf", "Path to configuration file")

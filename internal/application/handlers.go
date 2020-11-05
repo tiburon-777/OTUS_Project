@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tiburon-777/OTUS_Project/previewer/cache"
-	"github.com/tiburon-777/OTUS_Project/previewer/config"
-	"github.com/tiburon-777/OTUS_Project/previewer/converter"
-	"github.com/tiburon-777/OTUS_Project/previewer/logger"
+	"github.com/tiburon-777/OTUS_Project/internal/cache"
+	"github.com/tiburon-777/OTUS_Project/internal/config"
+	"github.com/tiburon-777/OTUS_Project/internal/converter"
+	"github.com/tiburon-777/OTUS_Project/internal/logger"
 )
 
 func handler(c cache.Cache, conf config.Config) http.Handler {

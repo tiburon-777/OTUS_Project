@@ -6,15 +6,24 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
 )
 
+const testPortBase = 3000
+
 func TestIntegrationPositive(t *testing.T) {
+	testPort := strconv.Itoa(testPortBase + 1)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: ":3000", Handler: http.FileServer(http.Dir("../examples"))}
-	go server.ListenAndServe()
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../assets"))}
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	go func(ctx context.Context) {
 		main()
@@ -24,10 +33,10 @@ func TestIntegrationPositive(t *testing.T) {
 	wg.Add(2)
 	t.Run("remote server return jpeg", func(t *testing.T) {
 		defer wg.Done()
-		body, _, err := request("http://localhost:8080/fill/1024/504/localhost:3000/gopher_original_1024x504.jpg", 15*time.Second)
+		body, resp, err := request("http://localhost:8080/fill/1024/504/localhost:"+testPort+"/gopher_original_1024x504.jpg", 15*time.Second)
 		require.NoError(t, err)
 		require.NotNil(t, body)
-		//require.Equal(t, 200, resp.StatusCode)
+		require.Equal(t, 200, resp.StatusCode)
 	})
 	t.Run("found pic in cache", func(t *testing.T) {
 		defer wg.Done()
@@ -42,10 +51,15 @@ func TestIntegrationPositive(t *testing.T) {
 }
 
 func TestIntegrationNegative(t *testing.T) {
-	// Развернуть веб сервис со статическими картинками
+	testPort := strconv.Itoa(testPortBase + 2)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: ":3000", Handler: http.FileServer(http.Dir("../examples"))}
-	go server.ListenAndServe()
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../assets"))}
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	// Запустить наше приложение
 	go func(ctx context.Context) {
