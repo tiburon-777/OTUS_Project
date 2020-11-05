@@ -1,8 +1,11 @@
 build:
 	go build -o bin ./cmd/main.go
 
-test:
-	go test -race ./cmd/... ./internal/...
+unit-test:
+	go test -race ./internal/...
+
+integration-test:
+	go test -v ./cmd/...
 
 lint: install-lint-deps
 	golangci-lint run ./previewer/... ./internal/...
