@@ -30,6 +30,7 @@ jobs:
       install: go mod download
       script:
         - make lint
-        - make test
+        - make unit-test
+        - integration-test
         - make build
       if: (type = push) OR (type = pull_request)
