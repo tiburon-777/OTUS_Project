@@ -17,7 +17,7 @@ const testPortBase = 3000
 func TestIntegrationPositive(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 1)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("./test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
@@ -29,6 +29,7 @@ func TestIntegrationPositive(t *testing.T) {
 		main()
 	}(ctx)
 
+	//time.Sleep(30*time.Second)
 	// Реализовать тесты логики приложения (ресайзы по разным требованиям):
 	wg.Add(2)
 	t.Run("remote server return jpeg", func(t *testing.T) {
@@ -53,7 +54,7 @@ func TestIntegrationPositive(t *testing.T) {
 func TestIntegrationNegative(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 2)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("./test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
