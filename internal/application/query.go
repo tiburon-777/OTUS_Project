@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -44,7 +45,7 @@ func (q Query) id() string {
 
 func (q Query) fromOrigin(headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {
 	client := &http.Client{Timeout: timeout}
-	req, err := http.NewRequest("GET", "http://"+q.URL.Host+q.URL.Path, nil)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", "http://"+q.URL.Host+q.URL.Path, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't create request: %w", err)
 	}
