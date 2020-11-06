@@ -17,7 +17,7 @@ const testPortBase = 3000
 func TestIntegrationPositive(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 1)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("./test/data"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
@@ -31,10 +31,17 @@ func TestIntegrationPositive(t *testing.T) {
 
 	//time.Sleep(30*time.Second)
 	// Реализовать тесты логики приложения (ресайзы по разным требованиям):
-	wg.Add(2)
+	wg.Add(3)
+	t.Run("test static", func(t *testing.T) {
+		defer wg.Done()
+		body, resp, err := request("http://localhost:"+testPort+"/gopher_original_1024x504.jpg", 15*time.Second)
+		require.NoError(t, err)
+		require.NotNil(t, body)
+		require.Equal(t, 200, resp.StatusCode)
+	})
 	t.Run("remote server return jpeg", func(t *testing.T) {
 		defer wg.Done()
-		body, resp, err := request("http://localhost:8080/fill/1024/504/localhost:"+testPort+"/gopher_original_1024x504.jpg", 15*time.Second)
+		body, resp, err := request("http://localhost:80/fill/1024/504/localhost:"+testPort+"/gopher_original_1024x504.jpg", 15*time.Second)
 		require.NoError(t, err)
 		require.NotNil(t, body)
 		require.Equal(t, 200, resp.StatusCode)
@@ -54,7 +61,7 @@ func TestIntegrationPositive(t *testing.T) {
 func TestIntegrationNegative(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 2)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("./test/data"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
