@@ -1,3 +1,6 @@
+docker-build:
+	sudo docker build -t previewer .
+
 build:
 	go build -o bin ./cmd/main.go
 

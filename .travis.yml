@@ -31,6 +31,6 @@ jobs:
       script:
         - make lint
         - make unit-test
-        - make integration-test
         - make build
+        - make docker-build
       if: (type = push) OR (type = pull_request)

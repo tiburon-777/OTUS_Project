@@ -45,7 +45,9 @@ func (q Query) id() string {
 
 func (q Query) fromOrigin(headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {
 	client := &http.Client{Timeout: timeout}
-	req, err := http.NewRequestWithContext(context.Background(), "GET", "http://"+q.URL.Host+q.URL.Path, nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+q.URL.Path, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't create request: %w", err)
 	}
