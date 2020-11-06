@@ -40,7 +40,7 @@ func buildQuery(u *url.URL) (q Query, err error) {
 }
 
 func (q Query) id() string {
-	return strconv.Itoa(q.Width) + "/" + strconv.Itoa(q.Height) + "/" + q.URL.Path
+	return strings.Replace(strconv.Itoa(q.Width)+"/"+strconv.Itoa(q.Height)+q.URL.Path, "/", "_", -1)
 }
 
 func (q Query) fromOrigin(headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {

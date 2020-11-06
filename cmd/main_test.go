@@ -17,7 +17,7 @@ const testPortBase = 3000
 func TestIntegrationPositive(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 1)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../assets"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
@@ -53,7 +53,7 @@ func TestIntegrationPositive(t *testing.T) {
 func TestIntegrationNegative(t *testing.T) {
 	testPort := strconv.Itoa(testPortBase + 2)
 	wg := sync.WaitGroup{}
-	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../assets"))}
+	server := &http.Server{Addr: "localhost:" + testPort, Handler: http.FileServer(http.Dir("../test/data"))}
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {

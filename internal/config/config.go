@@ -13,7 +13,8 @@ type Config struct {
 		Port    string
 	}
 	Cache struct {
-		Capacity int
+		Capacity    int
+		StoragePath string
 	}
 	Query struct {
 		Timeout int
@@ -45,7 +46,10 @@ func (c *Config) SetDefault() {
 		Address string
 		Port    string
 	}{Address: "localhost", Port: "8080"}
-	c.Cache = struct{ Capacity int }{Capacity: 20}
+	c.Cache = struct {
+		Capacity    int
+		StoragePath string
+	}{Capacity: 20, StoragePath: "../assets/cache"}
 	c.Query = struct{ Timeout int }{Timeout: 15}
 	c.Log = struct {
 		File       string

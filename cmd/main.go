@@ -21,6 +21,10 @@ func main() {
 	}
 
 	app := application.New(conf)
+	err = app.Cache.Clear()
+	if err != nil {
+		log.Fatalf("can't clean cache: %s", err.Error())
+	}
 	go func() {
 		signals := make(chan os.Signal, 1)
 		signal.Notify(signals)

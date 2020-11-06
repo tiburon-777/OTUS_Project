@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/tiburon-777/OTUS_Project.svg)](https://travis-ci.org/tiburon-777/OTUS_Project)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tiburon-777/OTUS_Project)](https://goreportcard.com/report/github.com/tiburon-777/OTUS_Project)
 # Проектная работа Image previewer service
 
 ## Общее описание

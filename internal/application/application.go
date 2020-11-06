@@ -22,7 +22,7 @@ func New(conf config.Config) *App {
 	if err != nil {
 		oslog.Fatal("не удалось прикрутить логгер: ", err.Error())
 	}
-	c := cache.NewCache(conf.Cache.Capacity)
+	c := cache.NewCache(conf.Cache.Capacity, conf.Cache.StoragePath)
 	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port)}, Log: loger, Cache: c, Conf: conf}
 }
 

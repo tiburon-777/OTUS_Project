@@ -23,7 +23,7 @@ func TestLoggerLogic(t *testing.T) {
 		oslog.Fatal(err)
 	}
 
-	t.Run("Messages arround the level", func(t *testing.T) {
+	t.Run("Messages around the level", func(t *testing.T) {
 		log.Debugf("debug message")
 		log.Errorf("error message")
 
