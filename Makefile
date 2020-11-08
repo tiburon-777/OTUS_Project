@@ -1,8 +1,5 @@
-docker-build:
-	sudo docker build -t previewer .
-
-build:
-	go build -o bin ./cmd/main.go
+lint: install-lint-deps
+	golangci-lint run ./previewer/... ./internal/...
 
 unit-test:
 	go test -race ./internal/...
@@ -10,8 +7,15 @@ unit-test:
 integration-test:
 	go test -v ./cmd/...
 
-lint: install-lint-deps
-	golangci-lint run ./previewer/... ./internal/...
+build:
+	go build -o bin ./cmd/main.go
+
+
+docker-build:
+	sudo docker build -t previewer .
+
+docker-run:
+	sudo docker run -p 8080:8080 previewer
 
 install-lint-deps:
 	rm -rf $(shell go env GOPATH)/bin/golangci-lint

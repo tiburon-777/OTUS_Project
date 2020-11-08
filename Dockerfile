@@ -8,4 +8,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o prev
 FROM alpine:latest
 WORKDIR /
 COPY --from=builder /app/previewer .
+RUN mkdir -p /assets/cache
 CMD ["/previewer"]

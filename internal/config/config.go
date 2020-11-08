@@ -49,7 +49,7 @@ func (c *Config) SetDefault() {
 	c.Cache = struct {
 		Capacity    int
 		StoragePath string
-	}{Capacity: 20, StoragePath: "../assets/cache"}
+	}{Capacity: 20, StoragePath: "./assets/cache"}
 	c.Query = struct{ Timeout int }{Timeout: 15}
 	c.Log = struct {
 		File       string

@@ -38,7 +38,7 @@ func New(conf Config) (Interface, error) {
 
 	c := amitralog.Configuration{
 		EnableConsole:     !conf.MuteStdout,
-		ConsoleLevel:      amitralog.Fatal,
+		ConsoleLevel:      amitralog.Debug,
 		ConsoleJSONFormat: false,
 		EnableFile:        true,
 		FileLevel:         strings.ToLower(conf.Level),

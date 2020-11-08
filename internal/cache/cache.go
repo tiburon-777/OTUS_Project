@@ -32,7 +32,11 @@ type Item struct {
 
 func NewCache(capacity int, path string) Cache {
 	if _, err := ioutil.ReadDir(path); err != nil {
-		log.Fatalf("cache directory %s not exists: %s", path, err.Error())
+		log.Printf("cache directory %s not exists. Try to create.\n", path)
+		err = os.MkdirAll(path, 0777)
+		if err != nil {
+			log.Fatalf("can't create cache directory %s: %s", path, err.Error())
+		}
 	}
 	return &lruCache{
 		capacity: capacity,
