@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/tiburon-777/OTUS_Project/internal/application"
 	"github.com/tiburon-777/OTUS_Project/internal/config"
@@ -27,7 +28,7 @@ func main() {
 	}
 	go func() {
 		signals := make(chan os.Signal, 1)
-		signal.Notify(signals)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 
 		<-signals
 		signal.Stop(signals)

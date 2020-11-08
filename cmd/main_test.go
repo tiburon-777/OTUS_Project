@@ -29,8 +29,8 @@ func TestIntegrationPositive(t *testing.T) {
 		main()
 	}(ctx)
 
-	//time.Sleep(30*time.Second)
 	// Реализовать тесты логики приложения (ресайзы по разным требованиям):
+	time.Sleep(3*time.Second)
 	wg.Add(3)
 	t.Run("test static", func(t *testing.T) {
 		defer wg.Done()
@@ -75,6 +75,7 @@ func TestIntegrationNegative(t *testing.T) {
 	}(ctx)
 
 	// Реализовать тесты отказа:
+	time.Sleep(3*time.Second)
 	wg.Add(5)
 	t.Run("remote server not exist", func(t *testing.T) {
 		defer wg.Done()
