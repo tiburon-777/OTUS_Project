@@ -10,4 +10,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.6.1
 	gopkg.in/yaml.v2 v2.3.0 // indirect
+	mvdan.cc/gofumpt v0.0.0-20201107090320-a024667a00f1 // indirect
 )

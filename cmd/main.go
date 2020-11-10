@@ -11,8 +11,10 @@ import (
 	"github.com/tiburon-777/OTUS_Project/internal/config"
 )
 
-var ConfigFile = flag.String("config", "/etc/previewer.conf", "Path to configuration file")
-var CleanCache = flag.Bool("clean", false, "Set true if you need clean cache before start app")
+var (
+	ConfigFile = flag.String("config", "/etc/previewer.conf", "Path to configuration file")
+	CleanCache = flag.Bool("clean", false, "Set true if you need clean cache before start app")
+)
 
 func main() {
 	flag.Parse()
@@ -33,7 +35,7 @@ func main() {
 	}
 	go func() {
 		signals := make(chan os.Signal, 1)
-		signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 		<-signals
 		signal.Stop(signals)

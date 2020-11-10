@@ -16,7 +16,7 @@ func TestCache(t *testing.T) {
 		cacheDir, err := ioutil.TempDir("", "cache_.")
 		require.NoError(t, err, err)
 		defer os.RemoveAll(cacheDir)
-		c,err := NewCache(10, cacheDir)
+		c, err := NewCache(10, cacheDir)
 		require.NoError(t, err, err)
 		err = c.Clear()
 		require.NoError(t, err, err)
@@ -82,7 +82,7 @@ func TestCache(t *testing.T) {
 		cacheDir, err := ioutil.TempDir("", "cache_.")
 		require.NoError(t, err, err)
 		defer os.RemoveAll(cacheDir)
-		c,err := NewCache(3, cacheDir)
+		c, err := NewCache(3, cacheDir)
 		require.NoError(t, err, err)
 		err = c.Clear()
 		require.NoError(t, err, err)
@@ -128,7 +128,7 @@ func TestCacheMultithreading(t *testing.T) {
 	cacheDir, err := ioutil.TempDir("", "cache_.")
 	require.NoError(t, err, err)
 	defer os.RemoveAll(cacheDir)
-	c,err := NewCache(10, cacheDir)
+	c, err := NewCache(10, cacheDir)
 	require.NoError(t, err, err)
 	err = c.Clear()
 	require.NoError(t, err, err)
@@ -140,8 +140,8 @@ func TestCacheMultithreading(t *testing.T) {
 		defer wg.Done()
 		for i := 0; i < 10_000; i++ {
 			itm := strconv.Itoa(i)
-			_,err := c.Set(Key(itm), []byte(itm))
-			require.NoError(t,err,err)
+			_, err := c.Set(Key(itm), []byte(itm))
+			require.NoError(t, err, err)
 		}
 	}()
 
@@ -149,9 +149,11 @@ func TestCacheMultithreading(t *testing.T) {
 		defer wg.Done()
 		for i := 0; i < 10_000; i++ {
 			itm := strconv.Itoa(rand.Intn(10_000))
-			b,s,err := c.Get(Key(itm))
-			require.NoError(t,err,err)
-			if s {require.Equal(t, itm, string(b.([]uint8)))}
+			b, s, err := c.Get(Key(itm))
+			require.NoError(t, err, err)
+			if s {
+				require.Equal(t, itm, string(b.([]uint8)))
+			}
 
 		}
 	}()

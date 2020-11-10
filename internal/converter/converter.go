@@ -3,13 +3,14 @@ package converter
 import (
 	"bytes"
 	"errors"
-	"github.com/anthonynsimon/bild/transform"
 	"image"
 	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"net/http"
+
+	"github.com/anthonynsimon/bild/transform"
 )
 
 type Image struct {

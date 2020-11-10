@@ -61,7 +61,7 @@ func (l *lruCache) Set(key Key, value interface{}) (bool, error) {
 	if l.queue.Len() == l.capacity {
 		k, ok := l.queue.Back().Value.(Item)
 		if !ok {
-			return false, fmt.Errorf("can't cast type\n")
+			return false, fmt.Errorf("can't cast type")
 		}
 		err := l.remove(k.Value.(Key))
 		if err != nil {
@@ -90,7 +90,7 @@ func (l *lruCache) Get(key Key) (interface{}, bool, error) {
 	l.queue.MoveToFront(l.items[key])
 	s, ok := l.items[key].Value.(Item)
 	if !ok {
-		return nil, false, fmt.Errorf("can't cast type\n")
+		return nil, false, fmt.Errorf("can't cast type")
 	}
 	pic, err := l.loadIn(s.Key)
 	if err != nil {
