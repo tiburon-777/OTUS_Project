@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
-	oslog "log"
 	"os"
 	"testing"
 )
@@ -16,9 +15,7 @@ var _ = func() bool {
 func TestNewConfig(t *testing.T) {
 
 	badfile, err := ioutil.TempFile("", "conf.")
-	if err != nil {
-		oslog.Fatal(err)
-	}
+	require.NoError(t, err, err)
 	defer os.Remove(badfile.Name())
 	badfile.WriteString(`aefSD
 sadfg
@@ -27,9 +24,7 @@ V`)
 	badfile.Sync()
 
 	goodfile, err := ioutil.TempFile("", "conf.")
-	if err != nil {
-		oslog.Fatal(err)
-	}
+	require.NoError(t, err, err)
 	defer os.Remove(goodfile.Name())
 	goodfile.WriteString(`[Server]
 Address = "localhost"

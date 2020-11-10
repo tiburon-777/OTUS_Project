@@ -1,13 +1,12 @@
 package application
 
 import (
-	oslog "log"
-	"net"
-	"net/http"
-
+	"fmt"
 	"github.com/tiburon-777/OTUS_Project/internal/cache"
 	"github.com/tiburon-777/OTUS_Project/internal/config"
 	"github.com/tiburon-777/OTUS_Project/internal/logger"
+	"net"
+	"net/http"
 )
 
 type App struct {
@@ -17,21 +16,24 @@ type App struct {
 	Conf  config.Config
 }
 
-func New(conf config.Config) *App {
+func New(conf config.Config) (*App, error) {
 	loger, err := logger.New(conf.Log)
 	if err != nil {
-		oslog.Fatal("не удалось прикрутить логгер: ", err.Error())
+		return nil, fmt.Errorf("can't start logger:\n %w", err)
 	}
-	c := cache.NewCache(conf.Cache.Capacity, conf.Cache.StoragePath)
-	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port)}, Log: loger, Cache: c, Conf: conf}
+	c, err := cache.NewCache(conf.Cache.Capacity, conf.Cache.StoragePath)
+	if err != nil {
+		return nil, fmt.Errorf("can't start cache:\n %w", err)
+	}
+	return &App{Server: &http.Server{Addr: net.JoinHostPort(conf.Server.Address, conf.Server.Port)}, Log: loger, Cache: c, Conf: conf}, nil
 }
 
 func (s *App) Start() error {
 	s.Log.Infof("Server starting")
 	s.Handler = loggingMiddleware(handler(s.Cache, s.Conf, s.Log), s.Log)
-	_ = s.ListenAndServe()
+	err := s.ListenAndServe()
 	s.Log.Infof("Server stoped")
-	return nil
+	return err
 }
 
 func (s *App) Stop() error {

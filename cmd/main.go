@@ -12,6 +12,7 @@ import (
 )
 
 var ConfigFile = flag.String("config", "/etc/previewer.conf", "Path to configuration file")
+var CleanCache = flag.Bool("clean", false, "Set true if you need clean cache before start app")
 
 func main() {
 	flag.Parse()
@@ -20,11 +21,15 @@ func main() {
 		log.Println("Configuration file not found. Will use defaults.")
 		conf.SetDefault()
 	}
-
-	app := application.New(conf)
-	err = app.Cache.Clear()
+	app, err := application.New(conf)
 	if err != nil {
-		log.Fatalf("can't clean cache: %s", err.Error())
+		log.Fatal("can't start application:", err.Error())
+	}
+	if *CleanCache {
+		err = app.Cache.Clear()
+		if err != nil {
+			log.Fatalf("can't clean cache:\n %s", err.Error())
+		}
 	}
 	go func() {
 		signals := make(chan os.Signal, 1)

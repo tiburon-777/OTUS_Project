@@ -43,26 +43,22 @@ func (q Query) id() string {
 	return strings.Replace(strconv.Itoa(q.Width)+"/"+strconv.Itoa(q.Height)+q.URL.Path, "/", "_", -1)
 }
 
-func (q Query) fromOrigin(headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {
+func (q Query) fromOrigin(ctx context.Context, headers http.Header, timeout time.Duration) ([]byte, *http.Response, error) {
 	client := &http.Client{Timeout: timeout}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+q.URL.Host+q.URL.Path, nil)
 	if err != nil {
-		return nil, nil, fmt.Errorf("can't create request: %w", err)
+		return nil, nil, fmt.Errorf("can't create request:\n %w", err)
 	}
 	req.Header = headers
 	req.Close = true
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("can't do request: %w", err)
+		return nil, nil, fmt.Errorf("can't do request:\n %w", err)
 	}
 	body, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 	if err != nil {
-		return nil, nil, fmt.Errorf("can't read body from response: %w", err)
-	}
-	if err = res.Body.Close(); err != nil {
-		return nil, nil, fmt.Errorf("can't close body: %w", err)
+		return nil, nil, fmt.Errorf("can't read body from response:\n %w", err)
 	}
 	return body, res, nil
 }

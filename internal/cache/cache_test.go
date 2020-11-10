@@ -1,7 +1,9 @@
 package cache
 
 import (
+	"io/ioutil"
 	"math/rand"
+	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -11,8 +13,12 @@ import (
 
 func TestCache(t *testing.T) {
 	t.Run("empty cache", func(t *testing.T) {
-		c := NewCache(10, "../../assets/cache")
-		err := c.Clear()
+		cacheDir, err := ioutil.TempDir("", "cache_.")
+		require.NoError(t, err, err)
+		defer os.RemoveAll(cacheDir)
+		c,err := NewCache(10, cacheDir)
+		require.NoError(t, err, err)
+		err = c.Clear()
 		require.NoError(t, err, err)
 
 		_, ok, err := c.Get("aaa")
@@ -28,8 +34,12 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("simple", func(t *testing.T) {
-		c := NewCache(5, "../../assets/cache")
-		err := c.Clear()
+		cacheDir, err := ioutil.TempDir("", "cache_.")
+		require.NoError(t, err, err)
+		defer os.RemoveAll(cacheDir)
+		c, err := NewCache(5, cacheDir)
+		require.NoError(t, err, err)
+		err = c.Clear()
 		require.NoError(t, err, err)
 
 		wasInCache, err := c.Set("aaa", []byte("pic #1111"))
@@ -69,8 +79,12 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		c := NewCache(3, "../../assets/cache")
-		err := c.Clear()
+		cacheDir, err := ioutil.TempDir("", "cache_.")
+		require.NoError(t, err, err)
+		defer os.RemoveAll(cacheDir)
+		c,err := NewCache(3, cacheDir)
+		require.NoError(t, err, err)
+		err = c.Clear()
 		require.NoError(t, err, err)
 
 		wasInCache, err := c.Set("aaa", []byte("pic #1111"))
@@ -111,8 +125,12 @@ func TestCache(t *testing.T) {
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	c := NewCache(10, "../../assets/cache")
-	err := c.Clear()
+	cacheDir, err := ioutil.TempDir("", "cache_.")
+	require.NoError(t, err, err)
+	defer os.RemoveAll(cacheDir)
+	c,err := NewCache(10, cacheDir)
+	require.NoError(t, err, err)
+	err = c.Clear()
 	require.NoError(t, err, err)
 
 	wg := &sync.WaitGroup{}
@@ -122,7 +140,8 @@ func TestCacheMultithreading(t *testing.T) {
 		defer wg.Done()
 		for i := 0; i < 10_000; i++ {
 			itm := strconv.Itoa(i)
-			c.Set(Key(itm), []byte(itm))
+			_,err := c.Set(Key(itm), []byte(itm))
+			require.NoError(t,err,err)
 		}
 	}()
 
@@ -130,7 +149,10 @@ func TestCacheMultithreading(t *testing.T) {
 		defer wg.Done()
 		for i := 0; i < 10_000; i++ {
 			itm := strconv.Itoa(rand.Intn(10_000))
-			c.Get(Key(itm))
+			b,s,err := c.Get(Key(itm))
+			require.NoError(t,err,err)
+			if s {require.Equal(t, itm, string(b.([]uint8)))}
+
 		}
 	}()
 

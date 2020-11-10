@@ -10,3 +10,4 @@ WORKDIR /
 COPY --from=builder /app/previewer .
 RUN mkdir -p /assets/cache
 CMD ["/previewer"]
+EXPOSE 8080

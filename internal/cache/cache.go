@@ -22,7 +22,7 @@ type lruCache struct {
 	path     string
 	queue    *List
 	items    map[Key]*ListItem
-	mx       sync.RWMutex
+	mx       sync.Mutex
 }
 
 type Item struct {
@@ -30,12 +30,12 @@ type Item struct {
 	Value interface{}
 }
 
-func NewCache(capacity int, path string) Cache {
+func NewCache(capacity int, path string) (Cache, error) {
 	if _, err := ioutil.ReadDir(path); err != nil {
 		log.Printf("cache directory %s not exists. Try to create.\n", path)
 		err = os.MkdirAll(path, 0777)
 		if err != nil {
-			log.Fatalf("can't create cache directory %s: %s", path, err.Error())
+			return nil, fmt.Errorf("can't create cache directory %s:\n %w", path, err)
 		}
 	}
 	return &lruCache{
@@ -43,7 +43,7 @@ func NewCache(capacity int, path string) Cache {
 		path:     path,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem),
-	}
+	}, nil
 }
 
 func (l *lruCache) Set(key Key, value interface{}) (bool, error) {
@@ -52,7 +52,7 @@ func (l *lruCache) Set(key Key, value interface{}) (bool, error) {
 	if _, exists := l.items[key]; exists {
 		err := l.loadOut(key, value)
 		if err != nil {
-			return false, fmt.Errorf("can't replace file %s: %w", path.Join([]string{l.path, string(key)}...), err)
+			return false, fmt.Errorf("can't replace file %s:\n %w", path.Join([]string{l.path, string(key)}...), err)
 		}
 		l.items[key].Value = Item{Value: value, Key: key}
 		l.queue.MoveToFront(l.items[key])
@@ -61,18 +61,18 @@ func (l *lruCache) Set(key Key, value interface{}) (bool, error) {
 	if l.queue.Len() == l.capacity {
 		k, ok := l.queue.Back().Value.(Item)
 		if !ok {
-			return false, fmt.Errorf("can't cast type")
+			return false, fmt.Errorf("can't cast type\n")
 		}
 		err := l.remove(k.Value.(Key))
 		if err != nil {
-			return false, fmt.Errorf("can't delete file %s: %w", path.Join([]string{l.path, k.Value.(string)}...), err)
+			return false, fmt.Errorf("can't delete file %s:\n %w", path.Join([]string{l.path, k.Value.(string)}...), err)
 		}
 		delete(l.items, k.Key)
 		l.queue.Remove(l.queue.Back())
 	}
 	err := l.loadOut(key, value)
 	if err != nil {
-		return false, fmt.Errorf("can't save file %s: %w", path.Join([]string{l.path, string(key)}...), err)
+		return false, fmt.Errorf("can't save file %s:\n %w", path.Join([]string{l.path, string(key)}...), err)
 	}
 	if l.items == nil {
 		l.items = make(map[Key]*ListItem)
@@ -90,11 +90,11 @@ func (l *lruCache) Get(key Key) (interface{}, bool, error) {
 	l.queue.MoveToFront(l.items[key])
 	s, ok := l.items[key].Value.(Item)
 	if !ok {
-		return nil, false, fmt.Errorf("can't cast type")
+		return nil, false, fmt.Errorf("can't cast type\n")
 	}
 	pic, err := l.loadIn(s.Key)
 	if err != nil {
-		return nil, false, fmt.Errorf("can't load file %s: %w", path.Join([]string{l.path, string(s.Key)}...), err)
+		return nil, false, fmt.Errorf("can't load file %s:\n %w", path.Join([]string{l.path, string(s.Key)}...), err)
 	}
 	return pic, true, nil
 }
@@ -104,7 +104,7 @@ func (l *lruCache) Clear() error {
 	defer l.mx.Unlock()
 	err := l.drop()
 	if err != nil {
-		return fmt.Errorf("can't remove files from %s: %w", l.path, err)
+		return fmt.Errorf("can't remove files from %s:\n %w", l.path, err)
 	}
 	l.items = nil
 	l.queue.len = 0
@@ -116,7 +116,7 @@ func (l *lruCache) loadOut(name Key, pic interface{}) error {
 	filename := path.Join([]string{l.path, string(name)}...)
 	err := ioutil.WriteFile(filename, pic.([]byte), 0600)
 	if err != nil {
-		return fmt.Errorf("can't create or write file %s: %w", filename, err)
+		return fmt.Errorf("can't create or write file %s:\n %w", filename, err)
 	}
 	return nil
 }
@@ -128,11 +128,11 @@ func (l *lruCache) loadIn(name Key) ([]byte, error) {
 		_ = f.Close()
 	}()
 	if err != nil {
-		return nil, fmt.Errorf("can't open file %s: %w", filename, err)
+		return nil, fmt.Errorf("can't open file %s:\n %w", filename, err)
 	}
 	res, err := ioutil.ReadAll(f)
 	if err != nil {
-		return nil, fmt.Errorf("can't read file %s: %w", filename, err)
+		return nil, fmt.Errorf("can't read file %s:\n %w", filename, err)
 	}
 	return res, nil
 }
@@ -141,7 +141,7 @@ func (l *lruCache) remove(name Key) error {
 	filename := path.Join([]string{l.path, string(name)}...)
 	err := os.RemoveAll(filename)
 	if err != nil {
-		return fmt.Errorf("can't remove file %s: %w", filename, err)
+		return fmt.Errorf("can't remove file %s:\n %w", filename, err)
 	}
 	return nil
 }
@@ -149,13 +149,13 @@ func (l *lruCache) remove(name Key) error {
 func (l *lruCache) drop() error {
 	dir, err := ioutil.ReadDir(l.path)
 	if err != nil {
-		return fmt.Errorf("can't read directory %s: %w", l.path, err)
+		return fmt.Errorf("can't read directory %s:\n %w", l.path, err)
 	}
 	for _, d := range dir {
 		if d.Name() != "nofile" {
 			err := os.Remove(path.Join([]string{l.path, d.Name()}...))
 			if err != nil {
-				return fmt.Errorf("can't remove file %s/%s: %w", l.path, d.Name(), err)
+				return fmt.Errorf("can't remove file %s/%s:\n %w", l.path, d.Name(), err)
 			}
 		}
 	}

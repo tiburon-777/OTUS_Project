@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,53 +14,56 @@ import (
 
 func handler(c cache.Cache, conf config.Config, log logger.Interface) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, cansel := context.WithCancel(context.Background())
+		defer cansel()
 		q, err := buildQuery(r.URL)
 		if err != nil {
-			wErr := fmt.Errorf("can't parse query: %w", err)
-			log.Infof(wErr.Error())
-			http.Error(w, wErr.Error(), http.StatusNotFound)
+			wErr := fmt.Errorf("can't parse query:\n %w", err)
+			log.Warnf(wErr.Error())
+			http.Error(w, wErr.Error(), http.StatusBadRequest)
 			return
 		}
 		b, ok1, err := c.Get(cache.Key(q.id()))
 		if err != nil {
-			wErr := fmt.Errorf("can't get pic from cache: %w", err)
-			log.Infof(wErr.Error())
+			wErr := fmt.Errorf("can't get pic from cache:\n %w", err)
+			log.Errorf(wErr.Error())
 			http.Error(w, wErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		pic, ok2 := b.([]byte)
 		if ok1 && ok2 {
 			log.Infof("getting pic from cache")
-			writeResponse(w, nil, pic)
+			w.Header().Add("X-From-Appcache", "true")
+			_, _ = w.Write(pic)
 			return
 		}
-		pic, res, err := q.fromOrigin(r.Header, time.Duration(conf.Query.Timeout)*time.Second)
+		pic, res, err := q.fromOrigin(ctx, r.Header, time.Duration(conf.Query.Timeout)*time.Second)
 		if err != nil {
-			wErr := fmt.Errorf("can't get pic from origin: %w", err)
-			log.Infof(wErr.Error())
-			http.Error(w, wErr.Error(), http.StatusNotFound)
+			wErr := fmt.Errorf("can't get pic from origin:\n %w", err)
+			log.Warnf(wErr.Error())
+			http.Error(w, wErr.Error(), http.StatusBadGateway)
 			return
 		}
 		if res.StatusCode != 200 {
-			log.Infof("Pic not found in origin. Response status:", res.Status)
-			http.Error(w, "Pic not found in origin", http.StatusNotFound)
+			log.Infof("Pic not found in origin or have problem with upstream. Response status:", res.Status)
+			http.Error(w, "Pic not found in origin or have problem with upstream", res.StatusCode)
 			return
 		}
 		pic, err = converter.SelectType(q.Width, q.Height, pic)
 		if err != nil {
-			wErr := fmt.Errorf("can't convert pic: %w", err)
-			log.Infof(wErr.Error())
+			wErr := fmt.Errorf("can't convert pic:\n %w", err)
+			log.Errorf(wErr.Error())
 			http.Error(w, wErr.Error(), http.StatusInternalServerError)
 			return
 		}
 		_, err = c.Set(cache.Key(q.id()), pic)
 		if err != nil {
-			wErr := fmt.Errorf("can't add pic to cache: %w", err)
-			log.Infof(wErr.Error())
+			wErr := fmt.Errorf("can't add pic to cache:\n %w", err)
+			log.Errorf(wErr.Error())
 			http.Error(w, wErr.Error(), http.StatusInternalServerError)
 			return
 		}
-		writeResponse(w, nil, pic)
+		_, _ = w.Write(pic)
 	})
 }
 
@@ -76,13 +80,4 @@ func loggingMiddleware(next http.Handler, l logger.Interface) http.HandlerFunc {
 		}()
 		next.ServeHTTP(w, r)
 	})
-}
-
-func writeResponse(w http.ResponseWriter, h http.Header, body []byte) {
-	for name, values := range h {
-		for _, value := range values {
-			w.Header().Add(name, value)
-		}
-	}
-	_, _ = w.Write(body)
 }

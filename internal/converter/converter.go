@@ -3,20 +3,17 @@ package converter
 import (
 	"bytes"
 	"errors"
+	"github.com/anthonynsimon/bild/transform"
 	"image"
 	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"net/http"
-	"sync"
-
-	"github.com/anthonynsimon/bild/transform"
 )
 
 type Image struct {
 	image.Image
-	mx sync.Mutex
 }
 
 func SelectType(width int, height int, b []byte) ([]byte, error) {
@@ -74,7 +71,7 @@ func SelectType(width int, height int, b []byte) ([]byte, error) {
 }
 
 func NewImage(img image.Image) Image {
-	return Image{img, sync.Mutex{}}
+	return Image{Image{img}}
 }
 
 func (img *Image) convert(width int, height int) error {
@@ -83,8 +80,8 @@ func (img *Image) convert(width int, height int) error {
 	if width <= 0 || height <= 0 {
 		return errors.New("can't reduce toOrBelow zero")
 	}
-	sfOriginal, _ := sizeFactor(widthOrig, heightOrig)
-	sfNew, _ := sizeFactor(width, height)
+	sfOriginal := sizeFactor(widthOrig, heightOrig)
+	sfNew := sizeFactor(width, height)
 
 	switch {
 	case sfOriginal > sfNew:
@@ -112,8 +109,6 @@ func (img *Image) convert(width int, height int) error {
 }
 
 func (img *Image) resize(width, height int) error {
-	img.mx.Lock()
-	defer img.mx.Unlock()
 	if width <= 0 || height <= 0 {
 		return errors.New("can't resize to zero or negative value")
 	}
@@ -123,8 +118,6 @@ func (img *Image) resize(width, height int) error {
 }
 
 func (img *Image) crop(p1 image.Point, p2 image.Point) error {
-	img.mx.Lock()
-	defer img.mx.Unlock()
 	if img.Image == nil {
 		return errors.New("corrupted image")
 	}
@@ -138,9 +131,6 @@ func (img *Image) crop(p1 image.Point, p2 image.Point) error {
 	return nil
 }
 
-func sizeFactor(width int, height int) (float64, error) {
-	if height == 0 {
-		return 0, errors.New("can't divide by zero")
-	}
-	return float64(width) / float64(height), nil
+func sizeFactor(width int, height int) float64 {
+	return float64(width) / float64(height)
 }
