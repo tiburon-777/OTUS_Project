@@ -138,7 +138,7 @@ func TestCacheMultithreading(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 10_000; i++ {
+		for i := 0; i < 100; i++ {
 			itm := strconv.Itoa(i)
 			_, err := c.Set(Key(itm), []byte(itm))
 			require.NoError(t, err, err)
@@ -147,8 +147,8 @@ func TestCacheMultithreading(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		for i := 0; i < 10_000; i++ {
-			itm := strconv.Itoa(rand.Intn(10_000))
+		for i := 0; i < 100; i++ {
+			itm := strconv.Itoa(rand.Intn(100))
 			b, s, err := c.Get(Key(itm))
 			require.NoError(t, err, err)
 			if s {

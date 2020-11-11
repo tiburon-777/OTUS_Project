@@ -3,11 +3,13 @@ package converter
 import (
 	"github.com/stretchr/testify/require"
 	"image"
-	"image/color"
 	"testing"
 )
 
-func TestResize(t *testing.T) {
+func TestResizeSlow(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 	table := []struct {
 		width     int
 		height    int
@@ -45,7 +47,10 @@ func TestResize(t *testing.T) {
 	}
 }
 
-func TestCrop(t *testing.T) {
+func TestCropSlow(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 	table := []struct {
 		topLeft     image.Point
 		bottomRight image.Point
@@ -92,7 +97,10 @@ func TestCrop(t *testing.T) {
 	}
 }
 
-func TestConvert(t *testing.T) {
+func TestConvertSlow(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
 	originalAspect := 800.0 / 600.0
 	releasedValue := 3000
 	table := []struct {
@@ -143,6 +151,8 @@ func TestConvert(t *testing.T) {
 
 func createImage(w, h int) image.Image {
 	res := image.NewRGBA(image.Rectangle{Min: image.Point{X: 0, Y: 0}, Max: image.Point{X: w, Y: h}})
+	/*
+	// С такой нагрузкой тест становится практически бесконечный
 	for x := 0; x < w; x++ {
 		for y := 0; y < h; y++ {
 			switch {
@@ -153,5 +163,6 @@ func createImage(w, h int) image.Image {
 			}
 		}
 	}
+	 */
 	return res
 }
