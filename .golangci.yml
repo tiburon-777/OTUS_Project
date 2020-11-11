@@ -17,3 +17,5 @@ linters:
     - nlreturn
     - whitespace
     - bodyclose
+    - wrapcheck
+    - exhaustivestruct
