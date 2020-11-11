@@ -30,7 +30,8 @@ jobs:
       install: go mod download
       script:
         - make lint
-        - make unit-test
+        - make unit-test-fast
+        - make unit-test-slow
         - make integration-test
         - make build
         - make docker-build
